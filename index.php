@@ -8,7 +8,29 @@
  * de PHP pour gérer la Requête (paramètres GET, POST, SESSION, COOKIES etc) 
  * et la Réponse (en-têtes, Cookies, Status et corps de la réponse) par des objets et des méthodes simples
  * et claires
+ */
+
+use Symfony\Component\HttpFoundation\Request;
+
+// On inclue l'autoloader pour travailler avec HttpFoundation
+require_once 'vendor/autoload.php';
+
+/**
+ * UTILISATION DE LA CLASSE REQUEST :
+ * -----------------------
+ * Lorsque l'on s'intéresse à la Requête HTTP, PHP nous donne certains outils très divers et variés (les superglobales):
+ * - Les tableaux associatifs $_GET et $_POST qui représentent les paramètres GET (dans l'URL) ou POST (dans le corps de la requête)
+ * - Les tableaux associatifs $_SESSION et $_COOKIES qui représentent les données stockées en SESSION ou dans les COOKIES du navigateur
+ * - Le tableau associatif $_SERVER qui représente les données de l'environnement (URL tapée, nom du fichier, version du navigateur etc)
  * 
+ * C'est déjà super mais l'utilisation de toutes ces informations sous la forme de simples tableaux associatifs implique parfois
+ * des pirouettes assez lourdes que se propose de corriger la classe Request
+ */
+
+// Créons une instance de la classe Request en se basant sur les superglobales de PHP
+$request = Request::createFromGlobals();
+
+/**
  * LES PARAMETRES DE L'APPLICATION :
  * ----------------
  *  
@@ -48,9 +70,11 @@ $format = 1;
  * 
  * Pour gérer ça, on passe par un cookie qui sera stocké sur le navigateur et qui contient le dernier format choisi
  */
-if (isset($_COOKIE['format'])) {
-    $format = $_COOKIE['format'];
-}
+$format = $request->cookies->getInt('format', $format);
+// if (isset($_COOKIE['format'])) {
+//     $format = $_COOKIE['format'];
+// }
+
 
 // Mais si on précise un format dans l'URL (GET), alors ça prend le dessus
 if (isset($_GET['format']) && ctype_digit($_GET['format']) && array_key_exists($_GET['format'], $availableFormats)) {
