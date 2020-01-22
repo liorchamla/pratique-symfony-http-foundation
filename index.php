@@ -49,12 +49,12 @@ $format = 1;
  * Pour gérer ça, on passe par un cookie qui sera stocké sur le navigateur et qui contient le dernier format choisi
  */
 if (isset($_COOKIE['format'])) {
-    $format = $_COOKIE['format'];
+    $format = (int) $_COOKIE['format'];
 }
 
 // Mais si on précise un format dans l'URL (GET), alors ça prend le dessus
 if (isset($_GET['format']) && ctype_digit($_GET['format']) && array_key_exists($_GET['format'], $availableFormats)) {
-    $format = $_GET['format'];
+    $format = (int) $_GET['format'];
 }
 
 // Une fois qu'on connait le format choisi (soit en GET, soit qui vient du Cookie)
