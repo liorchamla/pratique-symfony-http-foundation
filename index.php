@@ -10,7 +10,9 @@
  * et claires
  */
 
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 // On inclue l'autoloader pour travailler avec HttpFoundation
 require_once 'vendor/autoload.php';
@@ -111,9 +113,31 @@ if (!array_key_exists($format, $availableFormats)) {
  */
 
 
+/**
+ * UTILISATION DE LA CLASSE RESPONSE :
+ * -----------------------
+ * Lorsque l'on veut formuler une réponse HTTP avec PHP, on a là encore à faire à des outils divers et variés avec lesquels 
+ * il est facile de se perdre :
+ * - la fonction "echo" qui permet de définir ce qui doit s'afficher (le contenu de la réponse)
+ * - la fonction "header" qui permet de définir des en-têtes HTTP
+ * - la fonction "setcookie" qui permet de définir des cookies
+ * - la fonction "http_response_code" qui permet de déifnir le status HTTP de la réponse
+ * - et plein d'autres
+ * 
+ * La classe Response nous permet de manipuler toutes ces informations de façon simple via un simple objet :
+ * - VOUS GAGNEZ DE L'AUTOCOMPLETION ET DE LA CLARTE
+ * - VOUS GAGNEZ DES OUTILS COOLS
+ * => Conclusion : là encore, la DX (Expérience Développeur) est améliorée !
+ */
+$response = new Response();
+
 // Une fois qu'on connait le format choisi (soit en GET, soit qui vient du Cookie)
 // On le remet en place dans le Cookie "format"
-setcookie('format', $format);
+$formatCookie = Cookie::create('format', $format);
+$response->headers->setCookie($formatCookie);
+
+// Equivalent à l'ancien :
+// setcookie('format', $format);
 
 /**
  * --------------------------------------------------
@@ -127,8 +151,21 @@ setcookie('format', $format);
  * 
  * Pour gérer ça, on explique la politique de Cache HTTP au navigateur
  */
-header('Content-Type: text/html');
-header('Cache-Control: max-age=10');
+
+$response->headers->set('Content-Type', 'text/html');
+// Equivalent à l'ancien :
+// header('Content-Type: text/html');
+
+$response->setMaxAge(10);
+// Equivalent à l'ancien :
+// header('Cache-Control: max-age=10');
+// Peut aussi se faire comme ça : $response->headers->set('Cache-Control', 'max-age=10');
+
+// Et les deux informations peuvent aussi se donner comme suit :
+// $response->headers->add([
+//    'Content-Type' => 'text/html', 
+//    'Cache-Control' => 'max-age=10'
+// ]);
 
 /**
  * ALGORITHME ET CORPS DE LA REPONSE :
@@ -164,5 +201,20 @@ $template = '
 </html>
 ';
 
+$response->setContent($template);
+
+// Equivalent à l'ancien :
+// echo $template;
+
 // On affiche le contenu
-echo $template;
+$response->send();
+
+/**
+ * POINT OPTIMISATION DE CODE POUR LA RESPONSE :
+ * -----------------
+ * Tout ce qu'on a fait précédemment concernant la Response aurait pu être très réduit :
+ * 
+ * $response = new Response($template, 200, ['Content-Type' => 'text/html', 'Cache-Control' => 'max-age=10']);
+ * $response->headers->setCookie(Cookie::create('format', $format));
+ * $response->send();
+ */
