@@ -25,9 +25,6 @@ $availableFormats = [
     3 => 'd/m/Y H:i'
 ];
 
-// Format par défaut : si on n'a ni Cookie ni information dans l'URL (en GET), on prendra le format 1 (donc "14:55")
-$format = 1;
-
 // On regarde si il y a un cookie et si oui, on le prend
 $format = $request->cookies->getInt('format', $format);
 
@@ -36,6 +33,7 @@ $format = $request->query->getInt('format', $format);
 
 // Si le format est problématique (mal tapé dans le GET, ou modification malveillante dans le cookie) on met à 1 par défaut
 if (!array_key_exists($format, $availableFormats)) {
+    // Format par défaut : si on n'a ni Cookie ni information dans l'URL (en GET), on prendra le format 1 (donc "14:55")
     $format = 1;
 }
 
