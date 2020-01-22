@@ -25,6 +25,23 @@ require_once 'vendor/autoload.php';
  * 
  * C'est déjà super mais l'utilisation de toutes ces informations sous la forme de simples tableaux associatifs implique parfois
  * des pirouettes assez lourdes que se propose de corriger la classe Request
+ * 
+ * Ne vous en faites pas, tout ce qu'on pouvait trouver dans les superglobales se retrouve dans notre objet, et en plus on gagne
+ * des méthodes simples et claires pour les exploiter !
+ * - $request->query correspond à $_GET
+ * - $request->request correspond à $_POST
+ * - $request->getSession() correspond à $_SESSION
+ * - $request->cookies correspond à $_COOKIE
+ * - $request->server correspond à $_SERVER
+ * - $request->files correspond à $_FILES
+ * 
+ * Toutes ces données sont des ParameterBags, elles ont donc les mêmes méthodes pour faciliter l'accès aux informations 
+ * - VOUS UNIFIEZ VOTRE MANIERE DE TRAITER TOUTES CES DONNEES
+ * - VOUS GAGNEZ DE L'AUTOCOMPLETION ET DE LA CLARTE
+ * - VOUS GAGNEZ DES OUTILS COOLS
+ * => Conclusion : vous gagnez en expérience de développeur (ce qu'on appelle la DX, le plaisir que vous avez à travailler)
+ * 
+ * Et encore, je ne décris pas tous les outils qu'offre la classe Request
  */
 
 // Créons une instance de la classe Request en se basant sur les superglobales de PHP
@@ -71,15 +88,28 @@ $format = 1;
  * Pour gérer ça, on passe par un cookie qui sera stocké sur le navigateur et qui contient le dernier format choisi
  */
 $format = $request->cookies->getInt('format', $format);
+
+// Equivalent de l'ancien :
 // if (isset($_COOKIE['format'])) {
-//     $format = $_COOKIE['format'];
+//     $format = (int) $_COOKIE['format'];
 // }
 
 
 // Mais si on précise un format dans l'URL (GET), alors ça prend le dessus
-if (isset($_GET['format']) && ctype_digit($_GET['format']) && array_key_exists($_GET['format'], $availableFormats)) {
-    $format = $_GET['format'];
+$format = $request->query->getInt('format', $format);
+if (!array_key_exists($format, $availableFormats)) {
+    $format = 1;
 }
+
+// Equivalent avec une logique un peu modifiée de l'ancien :
+// if (isset($_GET['format']) && ctype_digit($_GET['format']) && array_key_exists($_GET['format'], $availableFormats)) {
+//     $format = (int) $_GET['format'];
+// }
+
+/**
+ * FIN DE L'UTILISATION ICI DE LA CLASSE REQUEST
+ */
+
 
 // Une fois qu'on connait le format choisi (soit en GET, soit qui vient du Cookie)
 // On le remet en place dans le Cookie "format"
