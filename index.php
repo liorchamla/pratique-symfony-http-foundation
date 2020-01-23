@@ -1,17 +1,21 @@
 <?php
 
 /**
- * TESTABILITE D'UN CODE PHP NATIF
+ * TESTABILITE D'UN CODE AVEC HTTPFOUNDATION
  * -------------
- * Nous nous intéressons ici à la testabilité de notre code PHP natif (sans HttpFoundation). Pour pouvoir tester ce code correctement
- * on a divisé notre code entre un code principal (ci-dessous) et quelques fonctions dans le fichier "functions.php"
+ * Ayant vu les problématiques posées par les tests unitaires sur un code en PHP NATIF, voyons désormais comment cela peut fonctionner
+ * si l'on utilise la couche objets fournie par symfony/http-foundation (beaucoup mieux ... oui :)).
  * 
- * Le code principal met en place une sorte de configuration, alors que la fonction "execute()" met en place le traitement.
- * 
- * Le reste du cours est à voir dans le fichier tests/TestApplication.php
+ * Pour ce faire, on garde la même architecture, mais on modifie la fonction execute() de façon à ce qu'on puisse lui passer la requête
+ * et qu'elle nous rende une réponse
  */
 
+use Symfony\Component\HttpFoundation\Request;
+
+require_once "vendor/autoload.php";
 require_once "functions.php";
+
+$request = Request::createFromGlobals();
 
 // Les formats possibles
 $availableFormats = [
@@ -20,4 +24,6 @@ $availableFormats = [
     3 => 'd/m/Y H:i'
 ];
 
-execute($availableFormats, 1);
+$response = execute($request, $availableFormats, 1);
+
+$response->send();
